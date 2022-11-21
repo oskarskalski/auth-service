@@ -1,0 +1,19 @@
+[package]
+name = "auth_service"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+jwt = "0.16.0"
+sha2 = "0.10.6"
+hmac = "0.12.1"
+rocket = { version = "0.5.0-rc.2", features = ["secrets", "json"] }
+serde = "1.0.147"
+serde_json = "1.0.87"
+chrono = { version = "0.4", features = ["serde"] }
+bcrypt = "0.13.0"
+uuid = { version = "1.2.1", features = ["v4", "fast-rng", "macro-diagnostics"] }
+diesel = { version = "1.0.0", features = ["postgres"] }
+dotenv = "0.15.0"
