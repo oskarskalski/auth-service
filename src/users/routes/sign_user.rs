@@ -1,8 +1,8 @@
 use rocket::post;
 use rocket::serde::json::Json;
-
-use crate::models::users::UserDto;
-use crate::models::users::{verify_user, create_user};
+use crate::users::models::user_dto::UserDto;
+use crate::users::service::create_user::create_user;
+use crate::users::service::insert_user::verify_user;
 
 #[post("/sign-in", format = "json", data = "<data>")]
 pub fn sign_in_user(data: Json<UserDto>) -> String {

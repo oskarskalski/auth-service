@@ -4,17 +4,18 @@ use jwt::{AlgorithmType, Header, SignWithKey, Token};
 use serde::{Deserialize, Serialize};
 use sha2::Sha384;
 use std::time::{SystemTime, UNIX_EPOCH};
-use crate::config::AppState;
 use rocket::http::Status;
 use rocket::outcome::Outcome;
 use rocket::request::{self, FromRequest, Request};
 
 use crate::config;
+use crate::models::team_roles::get_team_id_by_user_id;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Payload {
     pub timestamp: u64,
     pub user_id: String,
+    pub team_id: String, 
     pub expire_time: u64,
 }
 
@@ -68,10 +69,15 @@ pub fn create_payload(user_id: &str) -> Payload {
         .expect("Time went backwards");
     let timestamp: u64 = since_the_epoch.as_secs();
     let expire_time: u64 = since_the_epoch.as_secs() + 86400;
+    let team_id: String = match get_team_id(user_id.to_string()) {
+        Some(data) => data,
+        None => String::from("")
+    };
     let payload: Payload = Payload {
         timestamp: timestamp,
         user_id: user_id.to_string(),
         expire_time: expire_time,
+        team_id: team_id,
     };
     return payload;
 }
@@ -80,10 +86,10 @@ pub fn verify_jwt(jwt: &str) -> Payload {
     let key: Hmac<Sha384> = Hmac::new_from_slice(b"some-secret").unwrap();
     match jwt.verify_with_key(&key) {
         Ok(r) => r,
-        Err(_) => Payload {
-            timestamp: 0,
-            user_id: String::from(""),
-            expire_time: 0,
-        },
+        Err(_) => panic!("User verification has failed!"),
     }
+}
+
+pub fn get_team_id(user_id: String) -> Option<String>{
+    get_team_id_by_user_id(user_id)
 }

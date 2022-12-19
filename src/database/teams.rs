@@ -5,10 +5,9 @@ use diesel::{Insertable, Queryable, RunQueryDsl};
 use crate::schema::teams;
 
 #[derive(Queryable, Insertable)]
-#[diesel(table_name = users)]
+#[diesel(table_name = teams)]
 pub struct Team {
     pub team_id: String,
-    pub creator_id: String,
     pub team_name: String,
     pub description: String,
 }
@@ -27,12 +26,4 @@ pub fn select_team(conn: &mut PgConnection, team_id: String) -> Option<Team> {
         .filter(teams::team_id.eq(&team_id))
         .get_result::<Team>(conn)
         .ok()
-}
-
-pub fn select_team_ids(conn: &mut PgConnection, user_id: String) -> Option<Vec<Team>>{
-    use diesel::prelude::*;
-    teams::table
-    .filter(teams::creator_id.eq(&user_id))
-    .get_results::<Team>(conn)
-    .ok()
 }
