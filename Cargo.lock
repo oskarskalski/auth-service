@@ -105,13 +105,17 @@ dependencies = [
  "bcrypt",
  "chrono",
  "diesel",
+ "diesel_migrations",
  "dotenv",
  "hmac",
  "jwt",
+ "lazy_static",
+ "log",
  "rocket",
  "serde",
  "serde_json",
  "sha2",
+ "thread_local",
  "uuid",
 ]
 
@@ -368,25 +372,38 @@ dependencies = [
 
 [[package]]
 name = "diesel"
-version = "1.4.8"
+version = "2.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b28135ecf6b7d446b43e27e225622a038cc4e2930a1022f51cdb97ada19b8e4d"
+checksum = "68c186a7418a2aac330bb76cde82f16c36b03a66fb91db32d20214311f9f6545"
 dependencies = [
  "bitflags",
  "byteorder",
  "diesel_derives",
+ "itoa",
  "pq-sys",
 ]
 
 [[package]]
 name = "diesel_derives"
-version = "1.4.1"
+version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "45f5098f628d02a7a0f68ddba586fb61e80edec3bdc1be3b921f4ceec60858d3"
+checksum = "143b758c91dbc3fe1fdcb0dba5bd13276c6a66422f2ef5795b58488248a310aa"
 dependencies = [
+ "proc-macro-error",
  "proc-macro2",
  "quote",
  "syn",
+]
+
+[[package]]
+name = "diesel_migrations"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e9ae22beef5e9d6fab9225ddb073c1c6c1a7a6ded5019d5da11d1e5c5adc34e2"
+dependencies = [
+ "diesel",
+ "migrations_internals",
+ "migrations_macros",
 ]
 
 [[package]]
@@ -835,6 +852,27 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2dffe52ecf27772e601905b7522cb4ef790d2cc203488bbd0e2fe85fcb74566d"
 
 [[package]]
+name = "migrations_internals"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c493c09323068c01e54c685f7da41a9ccf9219735c3766fbfd6099806ea08fbc"
+dependencies = [
+ "serde",
+ "toml",
+]
+
+[[package]]
+name = "migrations_macros"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8a8ff27a350511de30cdabb77147501c36ef02e0451d957abea2f30caffb2b58"
+dependencies = [
+ "migrations_internals",
+ "proc-macro2",
+ "quote",
+]
+
+[[package]]
 name = "mime"
 version = "0.3.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1018,6 +1056,30 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3b845d6d8ec554f972a2c5298aad68953fd64e7441e846075450b44656a016d1"
 dependencies = [
  "vcpkg",
+]
+
+[[package]]
+name = "proc-macro-error"
+version = "1.0.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "da25490ff9892aab3fcf7c36f08cfb902dd3e71ca0f9f9517bea02a73a5ce38c"
+dependencies = [
+ "proc-macro-error-attr",
+ "proc-macro2",
+ "quote",
+ "syn",
+ "version_check",
+]
+
+[[package]]
+name = "proc-macro-error-attr"
+version = "1.0.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a1be40180e52ecc98ad80b184934baf3d0d29f979574e439af5a55274b35f869"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "version_check",
 ]
 
 [[package]]

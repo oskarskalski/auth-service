@@ -1,35 +1,45 @@
-
 #[macro_use]
 extern crate rocket;
 use rocket::serde::json::{json, Value};
 
-#[macro_use]
-extern crate diesel;
-
-mod schema;
-mod models;
 mod config;
-mod users;
-mod database;
-mod utils;
-mod routes;
+mod migration;
+mod request;
+mod roles;
+mod schema;
 mod security;
-use dotenv::dotenv;
-use routes::roles::role_ids;
-use crate::routes::roles::add_team_role;
-use crate::routes::teams::create_new_team;
-use crate::routes::roles::team_roles;
+mod team;
+mod users;
+mod utils;
+use crate::roles::routes::roles::role_ids;
+use crate::team::routes::team::create_new_team;
+use crate::team::routes::team::get_access_to_team;
 use crate::users::routes::sign_user::{sign_in_user, sign_up_user};
+use dotenv::dotenv;
+use utils::db_connection::establish_connection;
+
+use crate::team::routes::team_members::{add_team_member, get_user_teams};
 
 #[launch]
 pub fn rocket() -> _ {
     dotenv().ok();
+    migration::run_migration(&mut establish_connection());
     rocket::custom(config::from_env())
-        .mount("/auth", routes![sign_in_user, sign_up_user, create_new_team, role_ids, team_roles, add_team_role])
+        .mount(
+            "/auth",
+            routes![
+                sign_in_user,
+                sign_up_user,
+                create_new_team,
+                role_ids,
+                add_team_member,
+                get_user_teams,
+                get_access_to_team
+            ],
+        )
         .register("/", catchers![not_found, unauthorized, forbidden])
 }
 
-//routes::users::sign_in_user, routes::users::sign_up_user
 #[catch(404)]
 fn not_found() -> Value {
     json!({
