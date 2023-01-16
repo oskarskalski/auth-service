@@ -3,8 +3,6 @@ use std::io::Error as IoError;
 use std::{fs, vec};
 use toml;
 
-const SECRET: &'static str = "8Xui8SN4mI+7egV/9dlfYYLGQJeEx4+DwmSQLwDVXJg=";
-
 pub const TOKEN_PREFIX: &'static str = "Bearer ";
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -67,12 +65,12 @@ impl Config {
             match config_toml.database {
                 Some(database) => {
                     let db_hostname: String = database.hostname.unwrap_or_else(|| {
-                        println!("Missing field username in table database.");
+                        println!("Missing field hostname in table database.");
                         "unknown".to_owned()
                     });
 
                     let db_name: String = database.name.unwrap_or_else(|| {
-                        println!("Missing field username in table database.");
+                        println!("Missing field name in table database.");
                         "unknown".to_owned()
                     });
 

@@ -1,0 +1,11 @@
+[database]
+name = "postgres"
+username = "postgres"
+password = "mypassword"
+hostname = "localhost:5555"
+
+[jwt]
+secret_token = "secret"
+
+[secret]
+secret_key = "E1Ta/KyHHCx8V6GAW1CS2/7IkzTkYEIdDL+FlW8N280="

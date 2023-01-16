@@ -22,15 +22,22 @@ use dotenv::dotenv;
 use utils::db_connection::establish_connection;
 
 use crate::team::routes::team_members::{add_team_member, get_user_teams};
+use lazy_static::lazy_static;
+
+lazy_static! {
+    static ref CONFIG: Config = {
+        let args: Vec<String> = env::args().collect();
+        let config_path = if args.len() > 1 {
+            Some(args[1].as_str())
+        } else {
+            None
+        };
+        Config::new(config_path)
+    };
+}
 
 #[launch]
 pub fn rocket() -> _ {
-    let args: Vec<String> = env::args().collect();
-    let config_path = if args.len() > 1 {
-        Some(args[1].as_str())
-    } else {
-        None
-    };
     dotenv().ok();
     migration::run_migration(&mut establish_connection());
     use rocket::config::Config as RocketConfig;
