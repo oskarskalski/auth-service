@@ -1,5 +1,8 @@
 #[macro_use]
 extern crate rocket;
+use std::env;
+
+use config::Config;
 use rocket::serde::json::{json, Value};
 
 mod config;
@@ -22,9 +25,17 @@ use crate::team::routes::team_members::{add_team_member, get_user_teams};
 
 #[launch]
 pub fn rocket() -> _ {
+    let args: Vec<String> = env::args().collect();
+    let config_path = if args.len() > 1 {
+        Some(args[1].as_str())
+    } else {
+        None
+    };
     dotenv().ok();
     migration::run_migration(&mut establish_connection());
-    rocket::custom(config::from_env())
+    use rocket::config::Config as RocketConfig;
+
+    rocket::custom(RocketConfig::figment())
         .mount(
             "/auth",
             routes![

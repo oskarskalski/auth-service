@@ -35,7 +35,7 @@ fn add_jwt(jwt: Result<Jwt, ValidationErrors>, mut response: Response<String>) -
         Ok(data) => {
             response.add_header(String::from("Authorization"), String::from("Bearer ") + &data.token.unwrap());
         },
-        Err(err) => response.update_body_and_status(String::from("Couldn't log into created team. Try again..."), Status::InternalServerError),
+        Err(_) => response.update_body_and_status(String::from("Couldn't log into created team. Try again..."), Status::InternalServerError),
     };
     response
 }
