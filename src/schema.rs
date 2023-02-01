@@ -61,7 +61,8 @@ diesel::table! {
 diesel::table! {
     users (user_id) {
         user_id -> Varchar,
-        username -> Varchar,
+        first_name -> Varchar,
+        last_name -> Varchar,
         e_mail -> Varchar,
         password -> Varchar,
         created_at -> Int8,

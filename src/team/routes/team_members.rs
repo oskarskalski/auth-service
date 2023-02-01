@@ -1,12 +1,15 @@
 use rocket::http::Status;
 use rocket::serde::json::Json;
 
-use crate::request::request::RequestHolder;
-use crate::request::response::Response;
+use crate::rest::request::RequestHolder;
+use crate::rest::response::Response;
 use crate::team::models::dto::TeamMemberDto;
 use crate::team::models::team_member::TeamMember;
 
-#[get("/get-teams")]
+use rocket_okapi::openapi;
+
+#[openapi]
+#[get("/team/all")]
 pub fn get_user_teams(request_holder: RequestHolder) -> Response<'static, Vec<TeamMember>> {
     let mut response = Response::map(request_holder.clone());
     let payload = request_holder.payload.unwrap();
@@ -15,7 +18,8 @@ pub fn get_user_teams(request_holder: RequestHolder) -> Response<'static, Vec<Te
     response
 }
 
-#[post("/add-team-member", format = "json", data = "<data>")]
+#[openapi]
+#[post("/team/user", format = "json", data = "<data>")]
 pub fn add_team_member(
     data: Json<TeamMemberDto>,
     request_holder: RequestHolder,

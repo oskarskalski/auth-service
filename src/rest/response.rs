@@ -3,6 +3,7 @@ use rocket::{
     http::{Header, Status},
     response, Request,
 };
+use rocket_okapi::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::default::Default;
 
@@ -20,7 +21,7 @@ pub struct Response<'a, T> {
     pub path: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, JsonSchema)]
 pub struct ResponseDto<T> {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub body: Option<T>,
@@ -54,21 +55,21 @@ impl<'a, T> Response<'a, T> {
             path: request.path,
             status: Status::Ok,
             body: None,
-            error: None
+            error: None,
         }
     }
 
-    pub fn update_error(&mut self, error: String, status: Status){
+    pub fn update_error(&mut self, error: String, status: Status) {
         self.error = Some(error);
         self.status = status;
     }
 
-    pub fn update_body_and_status(&mut self, body: T, status: Status){
+    pub fn update_body_and_status(&mut self, body: T, status: Status) {
         self.body = Some(body);
         self.status = status;
     }
 
-    pub fn update_body(&mut self, body: T){
+    pub fn update_body(&mut self, body: T) {
         self.body = Some(body);
     }
 

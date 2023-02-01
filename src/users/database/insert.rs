@@ -1,13 +1,18 @@
-use diesel::pg::PgConnection;
 use crate::schema::users;
 use crate::users::models::user::User;
+use crate::utils::db_connection::DbConnection;
 use diesel::RunQueryDsl;
 
-pub fn insert_user(conn: &mut PgConnection, new_user: User) -> User {
-    diesel::insert_into(users::table)
-        .values(&new_user)
-        .execute(conn)
-        .unwrap();
-    new_user
-}
+pub struct InsertOperations {}
 
+impl InsertOperations {
+    pub fn insert_user(new_user: User) -> User {
+        let connection_pool = DbConnection::new();
+        let connection = &mut connection_pool.get();
+        diesel::insert_into(users::table)
+            .values(&new_user)
+            .execute(connection)
+            .unwrap();
+        new_user
+    }
+}

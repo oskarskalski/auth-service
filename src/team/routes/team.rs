@@ -1,14 +1,16 @@
 use rocket::http::{Status};
 use rocket::{post};
 use rocket::serde::json::Json;
-use crate::request::request::RequestHolder;
-use crate::request::response::Response;
+use rocket_okapi::openapi;
+use crate::rest::request::RequestHolder;
+use crate::rest::response::Response;
 use crate::security::jwt::Jwt;
 use crate::team::models::team::Team;
 use crate::team::models::dto::TeamDto;
 use crate::utils::errors::ValidationErrors;
 
-#[post("/create-team", format = "json", data = "<data>")]
+#[openapi]
+#[post("/team", format = "json", data = "<data>")]
 pub fn create_new_team(data: Json<TeamDto>, request_holder: RequestHolder) -> Response<'static, String> {
     let mut response = Response::map(request_holder.clone());
     let payload = request_holder.payload.unwrap();
@@ -22,7 +24,8 @@ pub fn create_new_team(data: Json<TeamDto>, request_holder: RequestHolder) -> Re
     response
 }
 
-#[get("/choose-team/<team_id>")]
+#[openapi]
+#[get("/team/<team_id>")]
 pub fn get_access_to_team(team_id: String, request_holder: RequestHolder) -> Response<'static, String>{
     let mut response: Response<String> = Response::map(request_holder.clone());
     let payload = request_holder.payload.unwrap();

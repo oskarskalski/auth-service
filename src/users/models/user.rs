@@ -1,5 +1,9 @@
+use crate::{
+    schema::users,
+    users::database::{insert::InsertOperations, select::SelectOperations},
+    utils::errors::ValidationErrors,
+};
 use diesel::{Insertable, Queryable};
-use crate::{schema::users, utils::{db_connection::establish_connection, errors::ValidationErrors}, users::database::{select::select_user, insert::insert_user}};
 
 use super::user_dto::UserDto;
 
@@ -9,39 +13,34 @@ extern crate bcrypt;
 #[diesel(table_name = users)]
 pub struct User {
     pub user_id: String,
-    pub username: String,
+    pub first_name: String,
+    pub last_name: String,
     pub e_mail: String,
     pub password: String,
     pub created_at: i64,
 }
 
 impl User {
-
-    pub fn new(username: String, e_mail: String, password: String) -> User {
+    pub fn new(user: UserDto) -> Result<Self, ValidationErrors> {
+        use bcrypt::{hash, DEFAULT_COST};
         use uuid::Uuid;
         let id = Uuid::new_v4().to_string();
         let date = chrono::offset::Utc::now().timestamp();
-        User {
-            user_id: id,
-            username: username,
-            e_mail: e_mail,
-            password: password,
-            created_at: date,
-        }
-    }
-
-    pub fn create(user: UserDto) -> Result<User, ValidationErrors>{
-        use bcrypt::{hash, DEFAULT_COST};
-
-        let connection = &mut establish_connection();
-        let username = match user.username {
+        let first_name = match user.first_name {
             Some(data) => data,
-            None => return Err(ValidationErrors::NullValue("Username is null".to_string())),
+            None => {
+                return Err(ValidationErrors::NullValue(
+                    "First name is null".to_string(),
+                ))
+            }
         };
-        let find_user = select_user(connection, username.clone());
-        match find_user {
-            Some(_) => return Err(ValidationErrors::InvalidValue("User already exists".to_string())),
-            None => (),
+        let last_name = match user.last_name {
+            Some(data) => data,
+            None => return Err(ValidationErrors::NullValue("Last name is null".to_string())),
+        };
+        let e_mail = match user.e_mail {
+            Some(data) => data,
+            None => return Err(ValidationErrors::NullValue("E-mail is empty".to_string())),
         };
         let user_passsword = match user.password {
             Some(data) => hash(data, DEFAULT_COST),
@@ -50,41 +49,79 @@ impl User {
 
         let password = match user_passsword {
             Ok(data) => data,
-            Err(_) => return Err(ValidationErrors::InvalidValue("Couldn't validate password".to_string())),
+            Err(_) => {
+                return Err(ValidationErrors::InvalidValue(
+                    "Couldn't validate password".to_string(),
+                ))
+            }
         };
-        let e_mail = match user.e_mail {
-            Some(data) => data,
-            None => return Err(ValidationErrors::NullValue("E-mail is empty".to_string())),
-        };
-        let new_user = User::new(username, e_mail, password);
-        insert_user(connection, new_user.clone());
-        return Ok(new_user);
+        Ok(
+            User {
+                user_id: id,
+                e_mail: e_mail,
+                first_name: first_name,
+                last_name: last_name,
+                password: password,
+                created_at: date,
+            }
+        )
     }
 
-    pub fn verify_user(user: UserDto) -> Result<String, ValidationErrors> {
+    pub fn create(&self) -> Result<i32, ValidationErrors> {
+        let find_user = self.get_user_by_email();
+        match find_user {
+            Some(_) => {
+                return Err(ValidationErrors::InvalidValue(
+                    "User already exists".to_string(),
+                ))
+            }
+            None => (),
+        };
+        self.insert_user();
+        return Ok(1);
+    }
+
+    pub fn verify_user(&self, user: UserDto) -> Result<String, ValidationErrors> {
         use bcrypt::verify;
-        let username = match user.username {
+        let e_mail = match user.e_mail {
             Some(data) => data,
-            None => return Err(ValidationErrors::NullValue("Username is null".to_string())),
+            None => return Err(ValidationErrors::NullValue("E-mail is null".to_string())),
         };
         let user_password = match user.password {
             Some(data) => data,
             None => return Err(ValidationErrors::NullValue("Password is null".to_string())),
         };
-        let connection = &mut establish_connection();
-        let find_user = select_user(connection, username);
+        let find_user = self.get_user_by_email();
         let find_user = match find_user {
             Some(data) => data,
-            None => return Err(ValidationErrors::InvalidValue("User with the username not found".to_string())),
+            None => {
+                return Err(ValidationErrors::InvalidValue(
+                    "User with the username not found".to_string(),
+                ))
+            }
         };
         match verify(user_password, &find_user.password) {
             Ok(is_correct) => {
                 if is_correct {
-                    return Ok(find_user.user_id)
+                    return Ok(find_user.user_id);
                 }
-                return Err(ValidationErrors::InvalidValue("The password is incorrect".to_string())) 
-            },
-            Err(_) => return Err(ValidationErrors::InvalidValue("Couldn't verify the password".to_string()))
+                return Err(ValidationErrors::InvalidValue(
+                    "The password is incorrect".to_string(),
+                ));
+            }
+            Err(_) => {
+                return Err(ValidationErrors::InvalidValue(
+                    "Couldn't verify the password".to_string(),
+                ))
+            }
         }
+    }
+
+    pub fn get_user_by_email(&self) -> Option<User> {
+        SelectOperations::select_user(self.e_mail.clone())
+    }
+
+    pub fn insert_user(&self) -> User {
+        InsertOperations::insert_user(self.clone())
     }
 }

@@ -3,9 +3,11 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use rocket::http::Status;
 use rocket::outcome::Outcome;
 use rocket::request::{self, FromRequest, Request};
+use rocket_okapi::okapi::openapi3::{SecurityScheme, SecuritySchemeData, SecurityRequirement, Object};
+use rocket_okapi::request::{OpenApiFromRequest, RequestHeaderInput};
 use serde::{Deserialize, Serialize};
 
-use crate::config;
+use crate::{CONFIG, config};
 
 use crate::security::jwt::Jwt;
 use crate::security::payload::Payload;
@@ -24,7 +26,7 @@ impl<'r> FromRequest<'r> for RequestHolder {
     async fn from_request(req: &'r Request<'_>) -> request::Outcome<RequestHolder, Self::Error> {
         use uuid::Uuid;
         let skipped_paths: Vec<String> =
-            vec!["/auth/sign-in".to_string(), "/auth/sign-up".to_string()];
+            vec!["/auth/login".to_string(), "/auth/register".to_string()];
         let path = req.uri().path().to_string();
         let request_id = extract_request_id_from_request(req);
         let request_id = match request_id {

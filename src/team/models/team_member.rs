@@ -1,4 +1,5 @@
 use diesel::{Insertable, Queryable};
+use rocket_okapi::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -12,7 +13,7 @@ use crate::{
 use super::dto::TeamMemberDto;
 use crate::schema::teammember;
 
-#[derive(Queryable, Insertable, Serialize, Deserialize)]
+#[derive(Queryable, Insertable, Serialize, Deserialize, JsonSchema)]
 #[table_name = "teammember"]
 pub struct TeamMember {
     pub team_member_id: String,

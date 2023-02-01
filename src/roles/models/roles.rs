@@ -1,10 +1,11 @@
 use diesel::{Insertable, Queryable};
+use rocket_okapi::JsonSchema;
 use serde::{Serialize, Deserialize};
 
 use crate::{schema::{systemrole, roles, rolesmap}, utils::db_connection::establish_connection};
 use crate::roles::database::select::select_roles;
 
-#[derive(Serialize, Deserialize, Debug, Queryable, Insertable)]
+#[derive(Serialize, Deserialize, Debug, Queryable, Insertable, JsonSchema)]
 #[table_name = "systemrole"]
 pub struct SystemRole {
     pub role_id: i32,

@@ -1,13 +1,14 @@
+use rocket_okapi::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, JsonSchema)]
 pub struct TeamDto{
     pub team_name: Option<String>,
     pub description: Option<String>
 }
 
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, JsonSchema)]
 pub struct TeamMemberDto {
     pub user_id: Option<String>,
     pub role_id: Option<i32>

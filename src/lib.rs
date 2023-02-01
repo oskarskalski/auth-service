@@ -4,12 +4,21 @@ use std::env;
 
 use config::Config;
 use rocket::serde::json::{json, Value};
+use rocket_okapi::openapi_get_routes;
+use rocket_okapi::rapidoc::make_rapidoc;
+use rocket_okapi::rapidoc::GeneralConfig;
+use rocket_okapi::rapidoc::HideShowConfig;
+use rocket_okapi::rapidoc::RapiDocConfig;
+use rocket_okapi::settings::UrlObject;
+use rocket_okapi::swagger_ui::make_swagger_ui;
+use rocket_okapi::swagger_ui::SwaggerUIConfig;
 
 mod config;
 mod migration;
-mod request;
+mod rest;
 mod roles;
 mod schema;
+mod tests;
 mod security;
 mod team;
 mod users;
@@ -17,11 +26,18 @@ mod utils;
 use crate::roles::routes::roles::role_ids;
 use crate::team::routes::team::create_new_team;
 use crate::team::routes::team::get_access_to_team;
-use crate::users::routes::sign_user::{sign_in_user, sign_up_user};
+use crate::users::routes::user_auth::{login, register};
 use dotenv::dotenv;
 use utils::db_connection::establish_connection;
-
+use crate::roles::routes::roles::okapi_add_operation_for_role_ids_;
+use crate::team::routes::team::okapi_add_operation_for_create_new_team_;
+use crate::team::routes::team::okapi_add_operation_for_get_access_to_team_;
+use crate::team::routes::team_members::okapi_add_operation_for_add_team_member_;
+use crate::team::routes::team_members::okapi_add_operation_for_get_user_teams_;
 use crate::team::routes::team_members::{add_team_member, get_user_teams};
+use crate::users::routes::user_auth::okapi_add_operation_for_login_;
+use crate::users::routes::user_auth::okapi_add_operation_for_register_;
+
 use lazy_static::lazy_static;
 
 lazy_static! {
@@ -35,7 +51,6 @@ lazy_static! {
         Config::new(config_path)
     };
 }
-
 #[launch]
 pub fn rocket() -> _ {
     dotenv().ok();
@@ -44,10 +59,32 @@ pub fn rocket() -> _ {
 
     rocket::custom(RocketConfig::figment())
         .mount(
+            "/swagger-ui/",
+            make_swagger_ui(&SwaggerUIConfig {
+                url: "/auth/openapi.json".to_owned(),
+                ..Default::default()
+            }),
+        )
+        .mount(
+            "/rapidoc/",
+            make_rapidoc(&RapiDocConfig {
+                general: GeneralConfig {
+                    spec_urls: vec![UrlObject::new("General", "/auth/openapi.json")],
+                    ..Default::default()
+                },
+                hide_show: HideShowConfig {
+                    allow_spec_url_load: false,
+                    allow_spec_file_load: false,
+                    ..Default::default()
+                },
+                ..Default::default()
+            }),
+        )
+        .mount(
             "/auth",
-            routes![
-                sign_in_user,
-                sign_up_user,
+            openapi_get_routes![
+                login,
+                register,
                 create_new_team,
                 role_ids,
                 add_team_member,

@@ -2,7 +2,7 @@ use rocket::http::Status;
 use rocket::outcome::Outcome;
 use rocket::request::{self, FromRequest, Request};
 
-use crate::config;
+use crate::{CONFIG, config};
 
 use super::jwt::Jwt;
 use super::payload::Payload;
